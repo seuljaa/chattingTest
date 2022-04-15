@@ -2,6 +2,8 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 import json
 
+from chatting.models import Message
+
 
 class ChatConsumer(WebsocketConsumer):
     # websocket 연결 시 실행
@@ -40,8 +42,11 @@ class ChatConsumer(WebsocketConsumer):
     # 클라이언트로부터 받은 메세지를 다시 클라이언트로 보내준다.
     def chat_message(self, event):
         message = event['message']
-
+        self.post_message(message=message)
         # Send message to WebSocket
         self.send(text_data=json.dumps({
             'message': message
         }))
+
+    def post_message(self, message):
+        Message.objects.create(text=message)
